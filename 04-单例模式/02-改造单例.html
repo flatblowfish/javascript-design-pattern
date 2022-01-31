@@ -1,0 +1,45 @@
+<!--
+##########################################################
+# 上一个单例中的
+# var createSingleLoginLayer = getSingle( createLoginLayer );
+# createSingleLoginLayer才是单例函数，能否把getSingle( createLoginLayer )直接做成单例函数呢？
+##########################################################
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<body>
+<button id="loginBtn">登录</button>
+</body>
+<script>
+    /* 书中第12章，享元模式中有 */
+    /* 使用闭包保存好根据fn生成的函数就行了 */
+    getSingle =  (function(){
+        var result = {};
+        return function(fn){
+            if ( result[fn] ){
+                return result[fn];
+            }
+            return result[fn] = fn .apply(this, arguments);
+        }
+    })();
+
+    var createLoginLayer = function(){
+        var div = document.createElement( 'div' );
+        div.innerHTML = '我是登录浮窗';
+        div.style.display = 'none';
+        document.body.appendChild( div );
+        return div;
+    };
+    document.getElementById( 'loginBtn' ).onclick = function(){
+        var loginLayer = getSingle( createLoginLayer );
+        loginLayer.style.display = 'block';
+        var loginLayer2 = getSingle( createLoginLayer );
+        console.log(loginLayer === loginLayer2); // 输出 true
+    };
+</script>
+</html>

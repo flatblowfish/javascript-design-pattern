@@ -1,0 +1,57 @@
+<!--
+##########################################################
+# 对象池：对象池是另外一种性能优化方案，它跟享元模式有一些相似之处，但没有分离内部状态和外部状态这个过程。
+# 个人理解：分离不了内外状态，也就用不了享元模式，这时可以使用对象池。
+##########################################################
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+
+    var objectPoolFactory = function( createObjFn ){
+        var objectPool = [];
+        return {
+            create: function(){
+                var obj = objectPool.length === 0 ?
+                    createObjFn.apply( this, arguments ) : objectPool.shift();
+                return obj;
+            },
+            recover: function( obj ){
+                objectPool.push( obj );
+
+            }
+        }
+    };
+
+    var iframeFactory = objectPoolFactory( function(){
+        var iframe = document.createElement( 'iframe' );
+        document.body.appendChild( iframe );
+        iframe.onload = function(){
+            iframe.onload = null; // 防止iframe 重复加载的bug
+            iframeFactory.recover( iframe ); // iframe 加载完成之后回收节点
+        }
+        return iframe;
+    });
+
+    var iframe1 = iframeFactory.create();
+    iframe1.src = 'iframe1.html';
+    // 立即调用 iframeFactory.create()，这时 上一个 iframeFactory.recover( iframe )还没有调用
+    // 所以，会再次创建一个iframe
+    var iframe2 = iframeFactory.create();
+    iframe2.src = 'iframe2.html';
+    // 3秒后，调用 iframeFactory.create()，这时 第一个 iframeFactory.recover( iframe )已经调用
+    // 所以，会使用第一个iframe加载'iframe3.html'
+    setTimeout(function(){
+        var iframe3 = iframeFactory.create();
+        iframe3.src = 'iframe3.html';
+    }, 3000 );
+
+</script>
+</html>

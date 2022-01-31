@@ -1,0 +1,136 @@
+<!--
+##########################################################
+# 缓动动画，不同的缓动算法可以互相替换
+##########################################################
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+</head>
+<style>
+    div {
+        position: absolute;
+        width: 300px;
+        height: 30px;
+        line-height: 30px;
+        padding-left: 5px;
+        background-color: #00b3ee;
+        color: white;
+    }
+</style>
+
+<body>
+    <div style="top:0;" id="div1">我是div1：缓动算法是：linear</div>
+    <div style="top:40px;" id="div2">我是div2：缓动算法是：easeIn</div>
+    <div style="top:80px;" id="div3">我是div3：缓动算法是：sineaseIn</div>
+    <div style="top:120px;" id="div4">我是div4：缓动算法是：strongEaseOut</div>
+    <div style="top:160px;" id="div5">我是div5：缓动算法是：sineaseIn</div>
+    <div style="top:200px;" id="div6">我是div6：缓动算法是：sineaseOut</div>
+</body>
+
+<script type="text/javascript">
+    // 一系列的缓动算法
+    // 4 个参数的含义分别是动画已消耗的时间、小球原始位置、小球目标位置（书上的表达有点模糊，实际上是小球运动的距离，从linear函数中可以看出来）、动画持续的总时间
+    // 返回的值则是动画元素应该处在的当前位置
+    var tween = {
+        linear: function (t, b, c, d) {
+            return c * t / d + b;
+        },
+        easeIn: function (t, b, c, d) {
+            return c * (t /= d) * t + b;
+        },
+        strongEaseIn: function (t, b, c, d) {
+            return c * (t /= d) * t * t * t * t + b;
+        },
+        strongEaseOut: function (t, b, c, d) {
+            return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+        },
+        sineaseIn: function (t, b, c, d) {
+            return c * (t /= d) * t * t + b;
+        },
+        sineaseOut: function (t, b, c, d) {
+            return c * ((t = t / d - 1) * t * t + 1) + b;
+        }
+    };
+
+    var Animate = function (dom) {
+        this.dom = dom; // 进行运动的dom 节点
+        this.startTime = 0; // 动画开始时间
+        this.startPos = 0; // 动画开始时，dom 节点的位置，即dom 的初始位置
+        this.endPos = 0; // 动画结束时，dom 节点的位置，即dom 的目标位置
+        this.propertyName = null; // dom 节点需要被改变的css 属性名
+        this.easing = null; // 缓动算法
+        this.duration = null; // 动画持续时间
+    };
+
+    Animate.prototype.start = function (propertyName, endPos, duration, easing) {
+        this.startTime = +new Date; // 动画启动时间
+        this.startPos = this.dom.getBoundingClientRect()[propertyName]; // dom 节点初始位置
+        this.propertyName = propertyName; // dom 节点需要被改变的CSS 属性名
+        this.endPos = endPos; // dom 节点目标位置
+        this.duration = duration; // 动画持续事件
+        this.easing = tween[easing]; // 缓动算法
+        var self = this;
+        // 这里需要this指向
+        // setInterval是window.setInterval调用的，里面的this指向window
+        // 书中：作为普通函数调用，此时的 this 总是指向全局对象。在浏览器的 JavaScript 里，这个全局对象是 window 对象。
+        var timeId = setInterval(function () { // 启动定时器，开始执行动画
+            console.log("setInterval 中的this指向window?");
+            console.log(this == window); // true
+            if (self.step() === false) { // 如果动画已结束，则清除定时器
+                clearInterval(timeId);
+            }
+        }, 19);
+        var test = testF();
+    };
+    testF = function () {
+        console.log("testF 中的this指向window?");
+        console.log(this == window); // true
+    }
+    Animate.prototype.step = function () {
+        var t = +new Date; // 取得当前时间
+        if (t >= this.startTime + this.duration) { // (1) 保证最后小球的位置在指定的 endPos
+            this.update(this.endPos); // 更新小球的CSS 属性值
+            return false;
+        }
+        var pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration);
+        // pos 为小球当前位置
+        this.update(pos); // 更新小球的CSS 属性值
+    };
+
+    Animate.prototype.update = function (pos) {
+        this.dom.style[this.propertyName] = pos + 'px';
+    };
+
+    // 书中初始化了一个，这里初始化三个便于形象化
+    var div1 = document.getElementById('div1');
+    var animate1 = new Animate(div1);
+    animate1.start('left', 500, 1000, 'linear');
+
+    var div2 = document.getElementById('div2');
+    var animate2 = new Animate(div2);
+    animate2.start('left', 500, 1000, 'easeIn');
+
+    var div3 = document.getElementById('div3');
+    var animate3 = new Animate(div3);
+    animate3.start('left', 500, 1000, 'sineaseIn');
+
+    var div4 = document.getElementById('div4');
+    var animate4 = new Animate(div4);
+    animate4.start('left', 500, 1000, 'strongEaseOut');
+
+    var div5 = document.getElementById('div5');
+    var animate5 = new Animate(div5);
+    animate5.start('left', 500, 1000, 'sineaseIn');
+
+    var div6 = document.getElementById('div6');
+    var animate6 = new Animate(div6);
+    animate6.start('left', 500, 1000, 'sineaseOut');
+
+</script>
+
+</html>

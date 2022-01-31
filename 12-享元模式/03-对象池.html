@@ -1,0 +1,55 @@
+<!--
+##########################################################
+# 对象池：对象池是另外一种性能优化方案，它跟享元模式有一些相似之处，但没有分离内部状态和外部状态这个过程。
+# 个人理解：分离不了内外状态，也就用不了享元模式，这时可以使用对象池。
+##########################################################
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+
+    var toolTipFactory = (function(){
+        var toolTipPool = []; // toolTip 对象池
+        return {
+            create: function(){
+                if ( toolTipPool.length === 0 ){ // 如果对象池为空
+                    var div = document.createElement( 'div' ); // 创建一个dom
+                    document.body.appendChild( div );
+                    return div;
+                }else{ // 如果对象池里不为空
+                    console.log("从对象池中取出一个dom");
+                    return toolTipPool.shift(); // 则从对象池中取出一个dom
+                }
+            },
+            recover: function( tooltipDom ){
+                return toolTipPool.push( tooltipDom ); // 对象池回收dom
+            }
+        }
+    })();
+
+    var ary = [];
+    // 创造
+    for ( var i = 0, str; str = [ 'A', 'B' ][ i++ ]; ){
+        var toolTip = toolTipFactory.create();
+        toolTip.innerHTML = str;
+        ary.push( toolTip );
+    };
+    // 回收
+    for ( var i = 0, toolTip; toolTip = ary[ i++ ]; ){
+        toolTipFactory.recover( toolTip );
+    };
+
+    for ( var i = 0, str; str = [ 'A', 'B', 'C', 'D', 'E', 'F' ][ i++ ]; ){
+        var toolTip = toolTipFactory.create();
+        toolTip.innerHTML = str;
+    };
+
+</script>
+</html>

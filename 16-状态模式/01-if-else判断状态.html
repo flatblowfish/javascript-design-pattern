@@ -1,0 +1,61 @@
+<!--
+##########################################################
+# 很明显 buttonWasPressed 方法是违反开放-封闭原则的，每次新增或者修改 light 的状态，都需要改动 buttonWasPressed 方法中的代码，这使得 buttonWasPressed 成为了一个非常不稳定的方法。
+# 所有跟状态有关的行为，都被封装在 buttonWasPressed 方法里，如果以后这个电灯又增加了强强光、超强光和终极强光，那我们将无法预计这个方法将膨胀到什么地步。当然为了简化示例，此处在状态发生改变的时候，只是简单地打印一条 log 和改变 button 的innerHTML。在实际开发中，要处理的事情可能比这多得多，也就是说， buttonWasPressed方法要比现在庞大得多。
+# 状态的切换非常不明显，仅仅表现为对 state 变量赋值，比如 this.state = 'weakLight'。在实际开发中，这样的操作很容易被程序员不小心漏掉。我们也没有办法一目了然地明白电灯一共有多少种状态，除非耐心地读完 buttonWasPressed 方法里的所有代码。当状态的种类多起来的时候，某一次切换的过程就好像被埋藏在一个巨大方法的某个阴暗角落里。
+# 状态之间的切换关系，不过是往 buttonWasPressed 方法里堆砌 if、 else 语句，增加或者修改一个状态可能需要改变若干个操作，这使 buttonWasPressed 更加难以阅读和维护。
+##########################################################
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+    var Light = function(){
+        this.state = 'off'; // 给电灯设置初始状态off
+        this.button = null; // 电灯开关按钮
+    };
+
+    Light.prototype.init = function(){
+        var button = document.createElement( 'button' ),
+            self = this;
+        button.innerHTML = '开关';
+        this.button = document.body.appendChild( button );
+        this.button.onclick = function(){
+            self.buttonWasPressed();
+        }
+    };
+
+    Light.prototype.buttonWasPressed = function(){
+        if ( this.state === 'off' ){
+            console.log( '开灯' );
+            this.state = 'on';
+        }else if ( this.state === 'on' ){
+            console.log( '关灯' );
+            this.state = 'off';
+        }
+    };
+
+    var light = new Light();
+    light.init();
+
+    Light.prototype.buttonWasPressed = function(){
+        if ( this.state === 'off' ){
+            console.log( '弱光' );
+            this.state = 'weakLight';
+        }else if ( this.state === 'weakLight' ){
+            console.log( '强光' );
+            this.state = 'strongLight';
+        }else if ( this.state === 'strongLight' ){
+            console.log( '关灯' );
+            this.state = 'off';
+        }
+    };
+
+</script>
+</html>

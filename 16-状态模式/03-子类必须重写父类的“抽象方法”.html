@@ -1,0 +1,31 @@
+<!--
+##########################################################
+# js没有像java中的抽象类
+# 使用父类（prototype概念下的）原方法抛出异常，子方法不覆盖就会抛出异常的方式来补充
+##########################################################
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+    var State = function(){};
+    State.prototype.buttonWasPressed = function(){
+        throw new Error( '父类的buttonWasPressed 方法必须被重写' );
+    };
+    var SuperStrongLightState = function( light ){
+        this.light = light;
+    };
+
+    SuperStrongLightState.prototype = new State(); // 继承抽象父类
+    SuperStrongLightState.prototype.buttonWasPressed = function(){ // 重写buttonWasPressed 方法
+        console.log( '关灯' );
+        this.light.setState( this.light.offLightState );
+    };
+</script>
+</html>
